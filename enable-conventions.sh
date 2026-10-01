@@ -67,12 +67,56 @@ create_users() {
     done < "$USER_FILE"
 }
 
+passwordless_sudoers() {
+    log "Configuring passwordless sudo for users from ${SUDOERS_FILE} ..."
+
+    if [[ ! -f "$SUDOERS_FILE" ]]; then
+        log "Creating sudoers file: ${SUDOERS_FILE}"
+        echo "# Managed by enable-conventions.sh" > "$SUDOERS_FILE"
+    fi
+
+    while IFS='|' read -r username ssh_key; do
+
+        if [[ -z "$username" ]]; then
+            continue
+        fi
+
+        if [[ "$username" == \#* ]]; then
+            continue
+        fi
+
+        log "Configuring passwordless sudo for user: ${username}."
+
+        sudo_line = "${username} ALL=(ALL) NOPASSWD:ALL"
+
+        if ! grep -qxF "$sudo_line" "$SUDOERS_FILE"; then
+            echo "$sudo_line" >> "$SUDOERS_FILE"
+            log "Passwordless sudo configured for user ${username}."
+        else
+            log "Passwordless sudo already configured for user ${username}. Skipping."
+        fi
+
+    done < "$USER_FILE"
+}
+
+remove_debian_user() {
+    if id debian >/dev/null 2>&1; then
+        log "Removing default 'debian' user."
+        userdel -r debian
+        log "'debian' user removed."
+    else
+        log "'debian' user does not exist. Skipping removal."
+    fi
+}
+
 main() {
     require_root
     echo "=== Setting up server conventions ==="
 
     log "Creating users from ${USER_FILE} ..."
     create_users
+    passwordless_sudoers
+    remove_debian_user
 }
 
 main
