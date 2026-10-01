@@ -4,7 +4,7 @@ set -eu
 
 readonly SCRIPT_DIR="/opt/sye-provisioning"
 readonly USER_FILE="${SCRIPT_DIR}/users.conf"
-readonly SUDOERS_FILE="${SCRIPT_DIR}/sudoers.conf"
+readonly SUDOERS_FILE="/etc/sudoers.d/90-cloud-init-users"
 
 log() {
     printf "[INFO] %s\n" "$1"
@@ -87,7 +87,7 @@ passwordless_sudoers() {
 
         log "Configuring passwordless sudo for user: ${username}."
 
-        sudo_line = "${username} ALL=(ALL) NOPASSWD:ALL"
+        sudo_line="${username} ALL=(ALL) NOPASSWD:ALL"
 
         if ! grep -qxF "$sudo_line" "$SUDOERS_FILE"; then
             echo "$sudo_line" >> "$SUDOERS_FILE"
