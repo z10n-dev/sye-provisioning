@@ -27,3 +27,5 @@ main() {
 
     log "Creating users from ${USER_FILE}..."
 }
+
+main
