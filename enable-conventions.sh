@@ -28,11 +28,11 @@ create_users() {
 
     while IFS='|' read -r username ssh_key; do
 
-        if [[-z "$username" ]]; then
+        if [[ -z "$username" ]]; then
             continue
         fi
 
-        if [["$username" == \#* ]]; then
+        if [[ "$username" == \#* ]]; then
             continue
         fi
 
